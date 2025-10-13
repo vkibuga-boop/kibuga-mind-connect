@@ -14,7 +14,330 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      available_time_slots: {
+        Row: {
+          created_at: string | null
+          date: string
+          end_time: string
+          id: string
+          is_available: boolean | null
+          session_format: Database["public"]["Enums"]["session_format"]
+          start_time: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          end_time: string
+          id?: string
+          is_available?: boolean | null
+          session_format: Database["public"]["Enums"]["session_format"]
+          start_time: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          end_time?: string
+          id?: string
+          is_available?: boolean | null
+          session_format?: Database["public"]["Enums"]["session_format"]
+          start_time?: string
+        }
+        Relationships: []
+      }
+      bush_buddies_bookings: {
+        Row: {
+          created_at: string | null
+          event_id: string | null
+          id: string
+          notes: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
+          status: Database["public"]["Enums"]["booking_status"] | null
+          total_price_kes: number | null
+          total_price_usd: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_price_kes?: number | null
+          total_price_usd?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_price_kes?: number | null
+          total_price_usd?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bush_buddies_bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "bush_buddies_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bush_buddies_events: {
+        Row: {
+          created_at: string | null
+          current_participants: number | null
+          date: string
+          description: string | null
+          end_time: string
+          id: string
+          is_active: boolean | null
+          location: string | null
+          max_participants: number | null
+          poster_url: string | null
+          price_kes: number | null
+          price_usd: number | null
+          start_time: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_participants?: number | null
+          date: string
+          description?: string | null
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          poster_url?: string | null
+          price_kes?: number | null
+          price_usd?: number | null
+          start_time: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_participants?: number | null
+          date?: string
+          description?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          poster_url?: string | null
+          price_kes?: number | null
+          price_usd?: number | null
+          start_time?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      psychometric_assessments: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          questions: Json
+          result_fee_kes: number | null
+          result_fee_usd: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          questions: Json
+          result_fee_kes?: number | null
+          result_fee_usd?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          questions?: Json
+          result_fee_kes?: number | null
+          result_fee_usd?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      therapy_bookings: {
+        Row: {
+          booking_date: string
+          booking_time: string
+          created_at: string | null
+          discount_applied: boolean | null
+          discount_percentage: number | null
+          id: string
+          is_first_session: boolean | null
+          meeting_link: string | null
+          notes: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
+          service_id: string | null
+          session_format: Database["public"]["Enums"]["session_format"]
+          sessions_count: number | null
+          status: Database["public"]["Enums"]["booking_status"] | null
+          total_price_kes: number | null
+          total_price_usd: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_date: string
+          booking_time: string
+          created_at?: string | null
+          discount_applied?: boolean | null
+          discount_percentage?: number | null
+          id?: string
+          is_first_session?: boolean | null
+          meeting_link?: string | null
+          notes?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          service_id?: string | null
+          session_format: Database["public"]["Enums"]["session_format"]
+          sessions_count?: number | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_price_kes?: number | null
+          total_price_usd?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_date?: string
+          booking_time?: string
+          created_at?: string | null
+          discount_applied?: boolean | null
+          discount_percentage?: number | null
+          id?: string
+          is_first_session?: boolean | null
+          meeting_link?: string | null
+          notes?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          service_id?: string | null
+          session_format?: Database["public"]["Enums"]["session_format"]
+          sessions_count?: number | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_price_kes?: number | null
+          total_price_usd?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "therapy_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "therapy_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      therapy_services: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          online_price_kes: number | null
+          online_price_usd: number | null
+          physical_price_kes: number | null
+          physical_price_usd: number | null
+          type: Database["public"]["Enums"]["therapy_service_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          online_price_kes?: number | null
+          online_price_usd?: number | null
+          physical_price_kes?: number | null
+          physical_price_usd?: number | null
+          type: Database["public"]["Enums"]["therapy_service_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          online_price_kes?: number | null
+          online_price_usd?: number | null
+          physical_price_kes?: number | null
+          physical_price_usd?: number | null
+          type?: Database["public"]["Enums"]["therapy_service_type"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_assessment_results: {
+        Row: {
+          answers: Json
+          assessment_id: string | null
+          completed_at: string | null
+          id: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
+          result_unlocked: boolean | null
+          user_id: string
+        }
+        Insert: {
+          answers: Json
+          assessment_id?: string | null
+          completed_at?: string | null
+          id?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          result_unlocked?: boolean | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          assessment_id?: string | null
+          completed_at?: string | null
+          id?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          result_unlocked?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_assessment_results_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "psychometric_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +346,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      booking_status: "pending" | "confirmed" | "completed" | "cancelled"
+      payment_status: "pending" | "paid" | "refunded"
+      session_format: "online" | "physical"
+      therapy_service_type:
+        | "individual_adult"
+        | "adolescent"
+        | "couples"
+        | "group"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +480,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: ["pending", "confirmed", "completed", "cancelled"],
+      payment_status: ["pending", "paid", "refunded"],
+      session_format: ["online", "physical"],
+      therapy_service_type: [
+        "individual_adult",
+        "adolescent",
+        "couples",
+        "group",
+      ],
+    },
   },
 } as const
