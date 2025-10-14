@@ -61,7 +61,7 @@ const Assessments = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <Button variant="ghost" className="w-full">
+                <Button variant="ghost" className="w-full" onClick={() => window.location.href = "/assessments"}>
                   Take Assessment
                 </Button>
               </CardContent>
@@ -77,8 +77,8 @@ const Assessments = () => {
             Each assessment comes with a detailed interpretation session with a licensed professional to help you understand 
             your results and create an actionable wellness plan.
           </p>
-          <Button variant="secondary" size="lg" className="shadow-medium">
-            Schedule Assessment Review
+          <Button variant="secondary" size="lg" className="shadow-medium" onClick={() => window.location.href = "/assessments"}>
+            Browse All Assessments
           </Button>
         </div>
       </div>

@@ -25,13 +25,13 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button variant="hero" size="lg">
+              <Button variant="hero" size="lg" onClick={() => window.location.href = "/therapy-booking"}>
                 <Calendar className="w-5 h-5" />
                 Book Therapy Session
               </Button>
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" onClick={() => window.location.href = "/bush-buddies"}>
                 <Video className="w-5 h-5" />
-                Virtual Sessions Available
+                BUSH BUDDIES Adventures
               </Button>
             </div>
 

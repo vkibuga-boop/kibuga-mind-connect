@@ -96,7 +96,7 @@ const BookingSection = () => {
               </div>
 
               <div className="pt-4 space-y-3">
-                <Button variant="hero" size="lg" className="w-full">
+                <Button variant="hero" size="lg" className="w-full" onClick={() => window.location.href = "/therapy-booking"}>
                   View Available Times
                 </Button>
                 
