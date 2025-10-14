@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Menu, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import logo from "@/assets/logo.jpg";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -12,9 +13,7 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <div className="w-10 h-10 bg-gradient-hero rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">KM</span>
-            </div>
+            <img src={logo} alt="Kibuga Mwaniki Therapy" className="w-12 h-12 rounded-lg object-cover" />
             <div>
               <h1 className="text-xl font-bold">Kibuga Mwaniki</h1>
               <p className="text-xs text-muted-foreground">Professional Therapy & Consultancy</p>

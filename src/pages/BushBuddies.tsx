@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,16 +10,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const BushBuddies = () => {
-  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     fetchEvents();
@@ -45,7 +37,7 @@ const BushBuddies = () => {
 
   const handleBooking = async (eventId: string, priceKes: number, priceUsd: number) => {
     const { error } = await supabase.from("bush_buddies_bookings").insert({
-      user_id: user!.id,
+      user_id: null,
       event_id: eventId,
       total_price_kes: priceKes,
       total_price_usd: priceUsd,
@@ -56,11 +48,11 @@ const BushBuddies = () => {
       return;
     }
 
-    toast.success("Event booked successfully!");
+    toast.success("Event booked successfully! You will be contacted for payment details.");
     fetchEvents();
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />

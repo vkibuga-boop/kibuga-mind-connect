@@ -134,7 +134,10 @@ const TherapyBooking = () => {
                 <SelectContent>
                   {services.map((service) => (
                     <SelectItem key={service.id} value={service.id}>
-                      {service.name} - KES {service.online_price_kes}
+                      {service.name}
+                      {service.online_price_kes 
+                        ? ` - KES ${service.online_price_kes} / $${service.online_price_usd}` 
+                        : ' - Upon Consultation'}
                     </SelectItem>
                   ))}
                 </SelectContent>
