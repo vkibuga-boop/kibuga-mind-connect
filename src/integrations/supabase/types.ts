@@ -302,6 +302,7 @@ export type Database = {
       }
       user_assessment_results: {
         Row: {
+          access_token: string | null
           admin_verified: boolean | null
           answers: Json
           assessment_id: string | null
@@ -315,6 +316,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          access_token?: string | null
           admin_verified?: boolean | null
           answers: Json
           assessment_id?: string | null
@@ -328,6 +330,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          access_token?: string | null
           admin_verified?: boolean | null
           answers?: Json
           assessment_id?: string | null

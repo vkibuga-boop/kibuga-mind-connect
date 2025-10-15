@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import { Loader2, Calendar, Clock, MapPin, Users, ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useAuth } from "@/hooks/useAuth";
 
 const BushBuddies = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,23 +38,30 @@ const BushBuddies = () => {
   };
 
   const handleBooking = async (eventId: string, priceKes: number, priceUsd: number) => {
+    if (!user) {
+      toast.error("Please sign in to book an event");
+      navigate("/auth");
+      return;
+    }
+
     const { error } = await supabase.from("bush_buddies_bookings").insert({
-      user_id: null,
+      user_id: user.id,
       event_id: eventId,
       total_price_kes: priceKes,
       total_price_usd: priceUsd,
     });
 
     if (error) {
-      toast.error("Failed to create booking");
+      toast.error("Failed to create booking. Please try again.");
+      console.error("Booking error:", error);
       return;
     }
 
-    toast.success("Event booked successfully! You will be contacted for payment details.");
+    toast.success("Event booked successfully! You'll receive payment instructions via email.");
     fetchEvents();
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />

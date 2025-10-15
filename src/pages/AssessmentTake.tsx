@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Loader2, ArrowLeft, AlertCircle, CheckCircle2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { z } from "zod";
 
 interface Question {
   id: string;
@@ -40,9 +41,18 @@ const AssessmentTake = () => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [accessToken, setAccessToken] = useState<string>("");
   const [email, setEmail] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [claimingPayment, setClaimingPayment] = useState(false);
+
+  // Validation schemas
+  const paymentClaimSchema = z.object({
+    email: z.string().email("Invalid email address").max(255, "Email too long"),
+    mobile_number: z.string()
+      .regex(/^\+254\d{9}$/, "Mobile number must be in format +254XXXXXXXXX")
+      .or(z.string().regex(/^07\d{8}$/, "Mobile number must be in format 07XXXXXXXX")),
+  });
 
   useEffect(() => {
     fetchAssessment();
@@ -92,7 +102,6 @@ const AssessmentTake = () => {
     for (const question of assessment.questions) {
       if (!answers[question.id] || 
           (Array.isArray(answers[question.id]) && answers[question.id].length === 0)) {
-        toast.error("Please answer all questions before submitting");
         return false;
       }
     }
@@ -100,55 +109,88 @@ const AssessmentTake = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateAnswers()) return;
+    if (!validateAnswers()) {
+      toast.error("Please answer all questions before submitting");
+      return;
+    }
 
     setSubmitting(true);
 
-    const { error } = await supabase
-      .from("user_assessment_results")
-      .insert({
-        assessment_id: id,
-        answers: answers,
-        payment_status: "pending",
-      });
+    try {
+      const { data, error } = await supabase
+        .from("user_assessment_results")
+        .insert({
+          assessment_id: id,
+          answers,
+          user_id: null,
+        })
+        .select("access_token")
+        .single();
 
-    if (error) {
-      toast.error("Failed to submit assessment");
+      if (error) throw error;
+
+      if (data?.access_token) {
+        setAccessToken(data.access_token);
+      }
+
+      setSubmitted(true);
+      toast.success("Assessment submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting assessment:", error);
+      toast.error("Failed to submit assessment. Please try again.");
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    setSubmitted(true);
-    setSubmitting(false);
-    toast.success("Assessment submitted successfully!");
   };
 
   const handleClaimPayment = async () => {
-    if (!email || !mobileNumber) {
-      toast.error("Please provide both email and mobile number");
-      return;
-    }
+    // Validate inputs
+    try {
+      // Normalize mobile number format
+      let normalizedMobile = mobileNumber.trim();
+      if (normalizedMobile.startsWith("07")) {
+        normalizedMobile = "+254" + normalizedMobile.substring(1);
+      }
 
-    setClaimingPayment(true);
+      const validatedData = paymentClaimSchema.parse({
+        email: email.trim(),
+        mobile_number: normalizedMobile,
+      });
 
-    const { error } = await supabase
-      .from("user_assessment_results")
-      .update({
-        email,
-        mobile_number: mobileNumber,
-        payment_claimed_at: new Date().toISOString(),
-      })
-      .eq("assessment_id", id)
-      .eq("answers", answers);
+      if (!accessToken) {
+        toast.error("Invalid submission. Please try taking the assessment again.");
+        return;
+      }
 
-    if (error) {
-      toast.error("Failed to claim payment");
+      setClaimingPayment(true);
+
+      const { data, error } = await supabase
+        .from("user_assessment_results")
+        .update({
+          email: validatedData.email,
+          mobile_number: validatedData.mobile_number,
+          payment_claimed_at: new Date().toISOString(),
+        })
+        .eq("access_token", accessToken)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success(
+        "Payment details saved! Please send payment to M-Pesa Paybill 542542, Account: 00305615756150. We'll verify and send your results via email within 24 hours."
+      );
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const firstError = error.issues[0];
+        toast.error(firstError.message);
+      } else {
+        console.error("Error claiming payment:", error);
+        toast.error("Failed to save payment details. Please try again.");
+      }
+    } finally {
       setClaimingPayment(false);
-      return;
     }
-
-    toast.success("Payment claim submitted! You'll receive your results via email once verified.");
-    setClaimingPayment(false);
   };
 
   if (loading) {
@@ -198,6 +240,7 @@ const AssessmentTake = () => {
                     placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    maxLength={255}
                     className="mt-1"
                   />
                 </div>
@@ -207,11 +250,15 @@ const AssessmentTake = () => {
                   <Input
                     id="mobile"
                     type="tel"
-                    placeholder="+254..."
+                    placeholder="+254712345678 or 0712345678"
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value)}
+                    maxLength={13}
                     className="mt-1"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Format: +254XXXXXXXXX or 07XXXXXXXX
+                  </p>
                 </div>
 
                 <Button 
