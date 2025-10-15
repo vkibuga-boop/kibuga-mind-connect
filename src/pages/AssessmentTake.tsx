@@ -1,0 +1,394 @@
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "sonner";
+import { Loader2, ArrowLeft, AlertCircle, CheckCircle2 } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
+interface Question {
+  id: string;
+  text: string;
+  type: "single" | "multiple" | "scale";
+  options?: string[];
+  scaleMin?: number;
+  scaleMax?: number;
+}
+
+interface Assessment {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  questions: Question[];
+  result_fee_kes: number;
+  result_fee_usd: number;
+}
+
+const AssessmentTake = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [assessment, setAssessment] = useState<Assessment | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [email, setEmail] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [claimingPayment, setClaimingPayment] = useState(false);
+
+  useEffect(() => {
+    fetchAssessment();
+  }, [id]);
+
+  const fetchAssessment = async () => {
+    if (!id) return;
+
+    const { data, error } = await supabase
+      .from("psychometric_assessments")
+      .select("*")
+      .eq("id", id)
+      .eq("is_active", true)
+      .single();
+
+    if (error || !data) {
+      toast.error("Failed to load assessment");
+      navigate("/assessments");
+      return;
+    }
+
+    setAssessment({
+      ...data,
+      questions: data.questions as unknown as Question[]
+    } as Assessment);
+    setLoading(false);
+  };
+
+  const handleAnswerChange = (questionId: string, value: any) => {
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleMultipleChoice = (questionId: string, option: string, checked: boolean) => {
+    setAnswers(prev => {
+      const current = prev[questionId] || [];
+      if (checked) {
+        return { ...prev, [questionId]: [...current, option] };
+      } else {
+        return { ...prev, [questionId]: current.filter((item: string) => item !== option) };
+      }
+    });
+  };
+
+  const validateAnswers = () => {
+    if (!assessment) return false;
+    
+    for (const question of assessment.questions) {
+      if (!answers[question.id] || 
+          (Array.isArray(answers[question.id]) && answers[question.id].length === 0)) {
+        toast.error("Please answer all questions before submitting");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateAnswers()) return;
+
+    setSubmitting(true);
+
+    const { error } = await supabase
+      .from("user_assessment_results")
+      .insert({
+        assessment_id: id,
+        answers: answers,
+        payment_status: "pending",
+      });
+
+    if (error) {
+      toast.error("Failed to submit assessment");
+      setSubmitting(false);
+      return;
+    }
+
+    setSubmitted(true);
+    setSubmitting(false);
+    toast.success("Assessment submitted successfully!");
+  };
+
+  const handleClaimPayment = async () => {
+    if (!email || !mobileNumber) {
+      toast.error("Please provide both email and mobile number");
+      return;
+    }
+
+    setClaimingPayment(true);
+
+    const { error } = await supabase
+      .from("user_assessment_results")
+      .update({
+        email,
+        mobile_number: mobileNumber,
+        payment_claimed_at: new Date().toISOString(),
+      })
+      .eq("assessment_id", id)
+      .eq("answers", answers);
+
+    if (error) {
+      toast.error("Failed to claim payment");
+      setClaimingPayment(false);
+      return;
+    }
+
+    toast.success("Payment claim submitted! You'll receive your results via email once verified.");
+    setClaimingPayment(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!assessment) {
+    return null;
+  }
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <div className="container mx-auto px-4 py-24 max-w-3xl">
+          <Card className="shadow-strong">
+            <CardHeader>
+              <div className="flex items-center gap-2 mb-4">
+                <CheckCircle2 className="w-8 h-8 text-green-600" />
+                <CardTitle className="text-2xl">Assessment Completed</CardTitle>
+              </div>
+              <CardDescription>
+                Thank you for completing the {assessment.name}. To receive your results, please complete the payment process below.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Payment Instructions</AlertTitle>
+                <AlertDescription className="space-y-2 mt-2">
+                  <p className="font-semibold">M-Pesa Paybill: 542542</p>
+                  <p className="font-semibold">Account Number: 00305615756150</p>
+                  <p className="mt-2">Amount: KES {assessment.result_fee_kes} (USD ${assessment.result_fee_usd})</p>
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="mobile">Mobile Number (for payment verification) *</Label>
+                  <Input
+                    id="mobile"
+                    type="tel"
+                    placeholder="+254..."
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <Button 
+                  onClick={handleClaimPayment} 
+                  disabled={claimingPayment || !email || !mobileNumber}
+                  className="w-full"
+                >
+                  {claimingPayment ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "I Have Paid - Send My Results"
+                  )}
+                </Button>
+              </div>
+
+              <Alert variant="default" className="bg-blue-50 border-blue-200">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-900">
+                  Once you submit your payment information, our team will verify it and send your detailed results to your email within 24 hours.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <div className="container mx-auto px-4 py-24 max-w-4xl">
+        <Button variant="ghost" onClick={() => navigate("/assessments")} className="mb-6">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Assessments
+        </Button>
+
+        <Card className="shadow-strong mb-6">
+          <CardHeader>
+            <CardTitle className="text-3xl">{assessment.name}</CardTitle>
+            <CardDescription className="text-base">{assessment.description}</CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Alert className="mb-6 bg-amber-50 border-amber-200">
+          <AlertCircle className="h-5 w-5 text-amber-600" />
+          <AlertTitle className="text-amber-900 font-semibold">Important Disclaimer</AlertTitle>
+          <AlertDescription className="text-amber-900 mt-2">
+            <p className="mb-2">
+              This assessment is a screening tool designed to help identify potential symptoms or concerns. 
+              It is <strong>not a diagnostic instrument</strong> and should not be used as a substitute for 
+              professional medical or psychological evaluation.
+            </p>
+            <p className="mb-2">
+              Results from this assessment should be interpreted in consultation with a qualified healthcare 
+              provider, psychologist, or psychiatrist who can conduct a comprehensive evaluation.
+            </p>
+            <p>
+              If you are experiencing severe symptoms or a mental health crisis, please seek immediate 
+              professional help or contact emergency services.
+            </p>
+          </AlertDescription>
+        </Alert>
+
+        <div className="space-y-6">
+          {assessment.questions.map((question, index) => (
+            <Card key={question.id} className="shadow-medium">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">
+                  Question {index + 1} of {assessment.questions.length}
+                </CardTitle>
+                <CardDescription className="text-base mt-2">{question.text}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {question.type === "single" && question.options && (
+                  <RadioGroup
+                    value={answers[question.id]}
+                    onValueChange={(value) => handleAnswerChange(question.id, value)}
+                  >
+                    {question.options.map((option) => (
+                      <div key={option} className="flex items-center space-x-2 py-2">
+                        <RadioGroupItem value={option} id={`${question.id}-${option}`} />
+                        <Label 
+                          htmlFor={`${question.id}-${option}`}
+                          className="font-normal cursor-pointer"
+                        >
+                          {option}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                )}
+
+                {question.type === "multiple" && question.options && (
+                  <div className="space-y-3">
+                    {question.options.map((option) => (
+                      <div key={option} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${question.id}-${option}`}
+                          checked={(answers[question.id] || []).includes(option)}
+                          onCheckedChange={(checked) => 
+                            handleMultipleChoice(question.id, option, checked as boolean)
+                          }
+                        />
+                        <Label
+                          htmlFor={`${question.id}-${option}`}
+                          className="font-normal cursor-pointer"
+                        >
+                          {option}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {question.type === "scale" && (
+                  <RadioGroup
+                    value={answers[question.id]?.toString()}
+                    onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
+                  >
+                    <div className="flex justify-between items-center">
+                      {Array.from(
+                        { length: (question.scaleMax || 10) - (question.scaleMin || 0) + 1 },
+                        (_, i) => (question.scaleMin || 0) + i
+                      ).map((value) => (
+                        <div key={value} className="flex flex-col items-center">
+                          <RadioGroupItem value={value.toString()} id={`${question.id}-${value}`} />
+                          <Label 
+                            htmlFor={`${question.id}-${value}`}
+                            className="mt-1 cursor-pointer"
+                          >
+                            {value}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                      <span>Not at all</span>
+                      <span>Extremely</span>
+                    </div>
+                  </RadioGroup>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card className="mt-6 shadow-strong">
+          <CardContent className="pt-6">
+            <Button 
+              onClick={handleSubmit} 
+              disabled={submitting}
+              className="w-full"
+              size="lg"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Complete Assessment"
+              )}
+            </Button>
+            <p className="text-sm text-muted-foreground text-center mt-3">
+              By submitting, you acknowledge that you have read and understood the disclaimer above.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
+export default AssessmentTake;
