@@ -302,31 +302,43 @@ export type Database = {
       }
       user_assessment_results: {
         Row: {
+          admin_verified: boolean | null
           answers: Json
           assessment_id: string | null
           completed_at: string | null
+          email: string | null
           id: string
+          mobile_number: string | null
+          payment_claimed_at: string | null
           payment_status: Database["public"]["Enums"]["payment_status"] | null
           result_unlocked: boolean | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
+          admin_verified?: boolean | null
           answers: Json
           assessment_id?: string | null
           completed_at?: string | null
+          email?: string | null
           id?: string
+          mobile_number?: string | null
+          payment_claimed_at?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
           result_unlocked?: boolean | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
+          admin_verified?: boolean | null
           answers?: Json
           assessment_id?: string | null
           completed_at?: string | null
+          email?: string | null
           id?: string
+          mobile_number?: string | null
+          payment_claimed_at?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
           result_unlocked?: boolean | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
