@@ -51,6 +51,7 @@ export type Database = {
           id: string
           notes: string | null
           payment_status: Database["public"]["Enums"]["payment_status"] | null
+          phone_number: string | null
           status: Database["public"]["Enums"]["booking_status"] | null
           total_price_kes: number | null
           total_price_usd: number | null
@@ -63,6 +64,7 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          phone_number?: string | null
           status?: Database["public"]["Enums"]["booking_status"] | null
           total_price_kes?: number | null
           total_price_usd?: number | null
@@ -75,6 +77,7 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          phone_number?: string | null
           status?: Database["public"]["Enums"]["booking_status"] | null
           total_price_kes?: number | null
           total_price_usd?: number | null
@@ -196,6 +199,7 @@ export type Database = {
           meeting_link: string | null
           notes: string | null
           payment_status: Database["public"]["Enums"]["payment_status"] | null
+          phone_number: string | null
           service_id: string | null
           session_format: Database["public"]["Enums"]["session_format"]
           sessions_count: number | null
@@ -216,6 +220,7 @@ export type Database = {
           meeting_link?: string | null
           notes?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          phone_number?: string | null
           service_id?: string | null
           session_format: Database["public"]["Enums"]["session_format"]
           sessions_count?: number | null
@@ -236,6 +241,7 @@ export type Database = {
           meeting_link?: string | null
           notes?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          phone_number?: string | null
           service_id?: string | null
           session_format?: Database["public"]["Enums"]["session_format"]
           sessions_count?: number | null

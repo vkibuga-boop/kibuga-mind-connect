@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Calendar, Clock, MapPin, Users, ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
@@ -13,6 +16,11 @@ const BushBuddies = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     fetchEvents();
@@ -35,20 +43,54 @@ const BushBuddies = () => {
     setLoading(false);
   };
 
-  const handleBooking = async (eventId: string, priceKes: number, priceUsd: number) => {
+  const handleBooking = async () => {
+    if (!selectedEvent || !name || !email || !phoneNumber) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    setBookingLoading(true);
+
     const { error } = await supabase.from("bush_buddies_bookings").insert({
-      event_id: eventId,
-      total_price_kes: priceKes,
-      total_price_usd: priceUsd,
+      event_id: selectedEvent.id,
+      total_price_kes: selectedEvent.price_kes,
+      total_price_usd: selectedEvent.price_usd,
+      phone_number: phoneNumber,
     });
 
     if (error) {
+      setBookingLoading(false);
       toast.error("Failed to create booking. Please try again.");
       console.error("Booking error:", error);
       return;
     }
 
-    toast.success("Event booked successfully! You'll receive payment instructions via email.");
+    // Send confirmation email
+    try {
+      await supabase.functions.invoke('send-booking-confirmation', {
+        body: {
+          name,
+          email,
+          phone_number: phoneNumber,
+          booking_type: 'bush_buddies',
+          event_title: selectedEvent.title,
+          event_date: new Date(selectedEvent.date).toLocaleDateString(),
+          event_time: `${selectedEvent.start_time} - ${selectedEvent.end_time}`,
+          event_location: selectedEvent.location,
+          price_kes: selectedEvent.price_kes,
+          price_usd: selectedEvent.price_usd,
+        }
+      });
+    } catch (emailError) {
+      console.error("Email notification failed:", emailError);
+    }
+
+    setBookingLoading(false);
+    toast.success("Event booked successfully! Check your email for confirmation.");
+    setSelectedEvent(null);
+    setName("");
+    setEmail("");
+    setPhoneNumber("");
     fetchEvents();
   };
 
@@ -123,12 +165,61 @@ const BushBuddies = () => {
                     <p className="text-2xl font-bold text-primary">KES {event.price_kes}</p>
                     <p className="text-sm text-muted-foreground">USD {event.price_usd}</p>
                   </div>
-                  <Button
-                    onClick={() => handleBooking(event.id, event.price_kes, event.price_usd)}
-                    disabled={event.current_participants >= event.max_participants}
-                  >
-                    {event.current_participants >= event.max_participants ? "Full" : "Book Now"}
-                  </Button>
+                  <Dialog open={selectedEvent?.id === event.id} onOpenChange={(open) => !open && setSelectedEvent(null)}>
+                    <DialogTrigger asChild>
+                      <Button
+                        onClick={() => setSelectedEvent(event)}
+                        disabled={event.current_participants >= event.max_participants}
+                      >
+                        {event.current_participants >= event.max_participants ? "Full" : "Book Now"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Complete Your Booking</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="event-name">Full Name</Label>
+                          <Input
+                            id="event-name"
+                            type="text"
+                            placeholder="Enter your full name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="event-email">Email Address</Label>
+                          <Input
+                            id="event-email"
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="event-phone">Phone Number</Label>
+                          <Input
+                            id="event-phone"
+                            type="tel"
+                            placeholder="e.g., 0771700115"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                          />
+                        </div>
+                        <Button
+                          onClick={handleBooking}
+                          disabled={bookingLoading || !name || !email || !phoneNumber}
+                          className="w-full"
+                        >
+                          {bookingLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                          Confirm Booking
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>
