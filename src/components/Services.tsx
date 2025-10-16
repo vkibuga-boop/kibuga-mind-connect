@@ -78,8 +78,12 @@ const Services = () => {
                   ))}
                 </ul>
                 
-                <Button variant="ghost" className="w-full group/btn">
-                  Learn More
+                <Button 
+                  variant="ghost" 
+                  className="w-full group/btn"
+                  onClick={() => window.open('https://wa.me/254771700115', '_blank')}
+                >
+                  Enquire
                   <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                 </Button>
               </CardContent>

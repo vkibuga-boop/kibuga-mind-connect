@@ -55,7 +55,7 @@ export type Database = {
           total_price_kes: number | null
           total_price_usd: number | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -67,7 +67,7 @@ export type Database = {
           total_price_kes?: number | null
           total_price_usd?: number | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -79,7 +79,7 @@ export type Database = {
           total_price_kes?: number | null
           total_price_usd?: number | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -203,7 +203,7 @@ export type Database = {
           total_price_kes: number | null
           total_price_usd: number | null
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           booking_date: string
@@ -223,7 +223,7 @@ export type Database = {
           total_price_kes?: number | null
           total_price_usd?: number | null
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           booking_date?: string
@@ -243,7 +243,7 @@ export type Database = {
           total_price_kes?: number | null
           total_price_usd?: number | null
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {

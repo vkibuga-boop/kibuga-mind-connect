@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,7 +12,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const TherapyBooking = () => {
-  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [services, setServices] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<string>("");
@@ -22,12 +20,6 @@ const TherapyBooking = () => {
   const [availableSlots, setAvailableSlots] = useState<any[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string>("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     fetchServices();
@@ -82,7 +74,6 @@ const TherapyBooking = () => {
     const priceUsdKey = sessionFormat === "online" ? "online_price_usd" : "physical_price_usd";
 
     const { error } = await supabase.from("therapy_bookings").insert([{
-      user_id: user!.id,
       service_id: selectedService,
       session_format: sessionFormat as "online" | "physical",
       booking_date: selectedDate.toISOString().split("T")[0],
@@ -102,13 +93,6 @@ const TherapyBooking = () => {
     navigate("/");
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen">
@@ -135,9 +119,6 @@ const TherapyBooking = () => {
                   {services.map((service) => (
                     <SelectItem key={service.id} value={service.id}>
                       {service.name}
-                      {service.online_price_kes 
-                        ? ` - KES ${service.online_price_kes} / $${service.online_price_usd}` 
-                        : ' - Upon Consultation'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -151,8 +132,8 @@ const TherapyBooking = () => {
                   <SelectValue placeholder="Select format" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="online">Virtual/Online</SelectItem>
-                  <SelectItem value="physical">In-Person</SelectItem>
+                  <SelectItem value="online">Virtual/Online - KES 1500 / $20</SelectItem>
+                  <SelectItem value="physical">In-Person - KES 200 / $25</SelectItem>
                 </SelectContent>
               </Select>
             </div>

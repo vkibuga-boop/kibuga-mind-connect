@@ -42,7 +42,7 @@ const Hero = () => {
               </div>
               <div className="h-12 w-px bg-border" />
               <div>
-                <p className="text-3xl font-bold text-secondary">15+</p>
+                <p className="text-3xl font-bold text-secondary">4+</p>
                 <p className="text-sm text-muted-foreground">Years Experience</p>
               </div>
               <div className="h-12 w-px bg-border" />
