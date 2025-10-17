@@ -341,12 +341,13 @@ const AssessmentTake = () => {
                   <RadioGroup
                     value={answers[question.id]}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
+                    name={question.id}
                   >
-                    {question.options.map((option) => (
-                      <div key={option} className="flex items-center space-x-2 py-2">
-                        <RadioGroupItem value={option} id={`${question.id}-${option}`} />
+                    {question.options.map((option, optIndex) => (
+                      <div key={`${question.id}-${optIndex}`} className="flex items-center space-x-2 py-2">
+                        <RadioGroupItem value={option} id={`${question.id}-${optIndex}`} />
                         <Label 
-                          htmlFor={`${question.id}-${option}`}
+                          htmlFor={`${question.id}-${optIndex}`}
                           className="font-normal cursor-pointer"
                         >
                           {option}
@@ -382,16 +383,17 @@ const AssessmentTake = () => {
                   <RadioGroup
                     value={answers[question.id]?.toString()}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
+                    name={question.id}
                   >
                     <div className="flex justify-between items-center">
                       {Array.from(
                         { length: (question.scaleMax || 10) - (question.scaleMin || 0) + 1 },
                         (_, i) => (question.scaleMin || 0) + i
                       ).map((value) => (
-                        <div key={value} className="flex flex-col items-center">
-                          <RadioGroupItem value={value.toString()} id={`${question.id}-${value}`} />
+                        <div key={`${question.id}-scale-${value}`} className="flex flex-col items-center">
+                          <RadioGroupItem value={value.toString()} id={`${question.id}-scale-${value}`} />
                           <Label 
-                            htmlFor={`${question.id}-${value}`}
+                            htmlFor={`${question.id}-scale-${value}`}
                             className="mt-1 cursor-pointer"
                           >
                             {value}

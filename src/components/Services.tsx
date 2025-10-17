@@ -90,6 +90,26 @@ const Services = () => {
             </Card>
           ))}
         </div>
+
+        <div className="mt-12 max-w-4xl mx-auto">
+          <Card className="bg-gradient-hero text-primary-foreground border-none shadow-strong">
+            <CardContent className="p-8 text-center">
+              <h3 className="text-3xl font-bold mb-3">🎉 Your First Therapy Session is FREE!</h3>
+              <p className="text-lg mb-6 opacity-90">
+                Experience professional mental health support with no commitment. Book your complimentary introductory session today and take the first step towards better mental wellbeing.
+              </p>
+              <Button 
+                variant="secondary" 
+                size="lg"
+                onClick={() => window.location.href = "/therapy-booking"}
+                className="shadow-medium"
+              >
+                Book Your Free Session
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </section>
   );
