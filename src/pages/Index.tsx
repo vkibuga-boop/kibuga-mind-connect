@@ -4,11 +4,13 @@ import Services from "@/components/Services";
 import Assessments from "@/components/Assessments";
 import BookingSection from "@/components/BookingSection";
 import Footer from "@/components/Footer";
+import FreeSessionBanner from "@/components/FreeSessionBanner";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      <FreeSessionBanner />
       <Hero />
       <Services />
       <Assessments />

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Loader2, ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { z } from "zod";
 
 const TherapyBooking = () => {
   const navigate = useNavigate();
@@ -65,10 +66,26 @@ const TherapyBooking = () => {
     setAvailableSlots(data || []);
   };
 
+  const bookingSchema = z.object({
+    name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name too long"),
+    email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
+    phoneNumber: z.string().trim().regex(/^(\+254|0)[17]\d{8}$/, "Invalid phone number format"),
+  });
+
   const handleBooking = async () => {
     if (!selectedService || !sessionFormat || !selectedDate || !selectedSlot || !name || !email || !phoneNumber) {
       toast.error("Please fill in all fields");
       return;
+    }
+
+    // Validate inputs
+    try {
+      bookingSchema.parse({ name, email, phoneNumber });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.issues[0].message);
+        return;
+      }
     }
 
     setLoading(true);
@@ -77,15 +94,15 @@ const TherapyBooking = () => {
     const priceKey = sessionFormat === "online" ? "online_price_kes" : "physical_price_kes";
     const priceUsdKey = sessionFormat === "online" ? "online_price_usd" : "physical_price_usd";
 
-    const { data: bookingData, error } = await supabase.from("therapy_bookings").insert([{
+    const { error } = await supabase.from("therapy_bookings").insert([{
       service_id: selectedService,
       session_format: sessionFormat as "online" | "physical",
       booking_date: selectedDate.toISOString().split("T")[0],
       booking_time: selectedSlot,
       total_price_kes: service[priceKey],
       total_price_usd: service[priceUsdKey],
-      phone_number: phoneNumber,
-    }]).select();
+      phone_number: phoneNumber.trim(),
+    }]);
 
     if (error) {
       setLoading(false);
@@ -97,9 +114,9 @@ const TherapyBooking = () => {
     try {
       await supabase.functions.invoke('send-booking-confirmation', {
         body: {
-          name,
-          email,
-          phone_number: phoneNumber,
+          name: name.trim(),
+          email: email.trim(),
+          phone_number: phoneNumber.trim(),
           booking_type: 'therapy',
           service_name: service.name,
           session_format: sessionFormat,
@@ -110,7 +127,7 @@ const TherapyBooking = () => {
         }
       });
     } catch (emailError) {
-      console.error("Email notification failed:", emailError);
+      // Email failure shouldn't block booking
     }
 
     setLoading(false);
