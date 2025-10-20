@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Menu, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { Calendar, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.jpg";
 
 const Header = () => {
-  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -28,21 +26,10 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                <Button variant="hero" size="default" className="hidden md:flex" onClick={() => navigate("/therapy-booking")}>
-                  <Calendar className="w-4 h-4" />
-                  Book Session
-                </Button>
-                <Button variant="ghost" size="icon" onClick={signOut} title="Sign Out">
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </>
-            ) : (
-              <Button variant="hero" size="default" className="hidden md:flex" onClick={() => navigate("/auth")}>
-                Sign In
-              </Button>
-            )}
+            <Button variant="default" size="default" className="hidden md:flex" onClick={() => navigate("/therapy-booking")}>
+              <Calendar className="w-4 h-4 mr-2" />
+              Book Session
+            </Button>
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="w-5 h-5" />
             </Button>

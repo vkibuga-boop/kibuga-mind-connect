@@ -79,17 +79,6 @@ const AssessmentTake = () => {
       questions: data.questions as unknown as Question[]
     } as Assessment;
 
-    // Initialize answers with default values to avoid uncontrolled component warnings
-    const initialAnswers: Record<string, any> = {};
-    assessmentData.questions.forEach(question => {
-      if (question.type === "multiple") {
-        initialAnswers[question.id] = [];
-      } else {
-        initialAnswers[question.id] = "";
-      }
-    });
-    setAnswers(initialAnswers);
-
     setAssessment(assessmentData);
     setLoading(false);
   };
@@ -358,15 +347,14 @@ const AssessmentTake = () => {
               <CardContent>
                 {question.type === "single" && question.options && (
                   <RadioGroup
-                    value={answers[question.id] === "" ? undefined : answers[question.id]}
+                    value={answers[question.id] || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
-                    name={`single-${question.id}`}
                   >
                     {question.options.map((option, optIndex) => (
                       <div key={`${question.id}-${optIndex}`} className="flex items-center space-x-2 py-2">
-                        <RadioGroupItem value={option} id={`${question.id}-single-${optIndex}`} />
+                        <RadioGroupItem value={option} id={`single-${question.id}-${optIndex}`} />
                         <Label 
-                          htmlFor={`${question.id}-single-${optIndex}`}
+                          htmlFor={`single-${question.id}-${optIndex}`}
                           className="font-normal cursor-pointer"
                         >
                           {option}
@@ -400,22 +388,21 @@ const AssessmentTake = () => {
 
                 {question.type === "scale" && (
                   <RadioGroup
-                    value={answers[question.id] === "" ? undefined : answers[question.id]?.toString()}
+                    value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
-                    name={`scale-${question.id}`}
                   >
                     <div className="flex justify-between items-center">
                       {Array.from(
                         { length: (question.scaleMax || 10) - (question.scaleMin || 0) + 1 },
                         (_, i) => (question.scaleMin || 0) + i
                       ).map((value) => (
-                        <div key={`${question.id}-scale-${value}`} className="flex flex-col items-center">
+                        <div key={`scale-${question.id}-${value}`} className="flex flex-col items-center">
                           <RadioGroupItem 
                             value={value.toString()} 
-                            id={`${question.id}-scale-${value}`}
+                            id={`scale-${question.id}-${value}`}
                           />
                           <Label 
-                            htmlFor={`${question.id}-scale-${value}`}
+                            htmlFor={`scale-${question.id}-${value}`}
                             className="mt-1 cursor-pointer"
                           >
                             {value}

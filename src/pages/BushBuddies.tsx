@@ -103,75 +103,94 @@ const BushBuddies = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
       <Header />
       <div className="container mx-auto px-4 py-24">
         <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Home
         </Button>
 
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">BUSH BUDDIES Adventures</h1>
-          <p className="text-lg text-muted-foreground">
-            Join us for therapeutic outdoor adventures that combine nature, wellness, and community
+        <div className="text-center max-w-3xl mx-auto mb-12 space-y-6">
+          <div className="inline-block px-6 py-2 bg-gradient-to-r from-green-500/10 to-teal-500/10 rounded-full border border-primary/20">
+            <span className="text-primary font-semibold text-sm tracking-wider">🌿 OUTDOOR WELLNESS ADVENTURES 🏔️</span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-green-600 via-teal-600 to-emerald-600 bg-clip-text text-transparent">
+            BUSH BUDDIES
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Reconnect with nature, discover inner peace, and build meaningful connections through therapeutic outdoor experiences
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event) => (
-            <Card key={event.id} className="shadow-medium hover:shadow-strong transition-all">
+            <Card key={event.id} className="overflow-hidden border-2 border-primary/20 shadow-medium hover:shadow-strong hover:border-primary/40 hover:scale-105 transition-all duration-300 bg-gradient-to-br from-card to-green-50/30 dark:to-green-950/20">
               {event.poster_url && (
-                <div className="h-48 overflow-hidden rounded-t-lg">
+                <div className="h-56 overflow-hidden relative group">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
                   <img
                     src={event.poster_url}
                     alt={event.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
+                  <div className="absolute top-4 right-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
+                    🌲 Adventure
+                  </div>
                 </div>
               )}
-              <CardHeader>
-                <CardTitle className="text-xl">{event.title}</CardTitle>
-                <CardDescription>{event.description}</CardDescription>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl bg-gradient-to-r from-green-700 to-teal-700 bg-clip-text text-transparent">{event.title}</CardTitle>
+                <CardDescription className="line-clamp-2">{event.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="w-4 h-4 text-primary" />
-                    <span>{new Date(event.date).toLocaleDateString()}</span>
+                <div className="space-y-3 text-sm bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-950/30 dark:to-teal-950/30 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-green-500 p-2 rounded-full">
+                      <Calendar className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium">{new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Clock className="w-4 h-4 text-primary" />
-                    <span>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-teal-500 p-2 rounded-full">
+                      <Clock className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium">
                       {event.start_time} - {event.end_time}
                     </span>
                   </div>
                   {event.location && (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="w-4 h-4 text-primary" />
-                      <span>{event.location}</span>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-emerald-500 p-2 rounded-full">
+                        <MapPin className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="font-medium">{event.location}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Users className="w-4 h-4 text-primary" />
-                    <span>
-                      {event.current_participants}/{event.max_participants} participants
+                  <div className="flex items-center gap-3">
+                    <div className="bg-cyan-500 p-2 rounded-full">
+                      <Users className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium">
+                      {event.current_participants}/{event.max_participants} adventurers
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div>
-                    <p className="text-2xl font-bold text-primary">KES {event.price_kes}</p>
-                    <p className="text-sm text-muted-foreground">USD {event.price_usd}</p>
+                <div className="flex items-center justify-between pt-4 border-t-2 border-green-200 dark:border-green-800">
+                  <div className="space-y-1">
+                    <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">KES {event.price_kes}</p>
+                    <p className="text-sm text-muted-foreground">USD ${event.price_usd}</p>
                   </div>
                   <Dialog open={selectedEvent?.id === event.id} onOpenChange={(open) => !open && setSelectedEvent(null)}>
                     <DialogTrigger asChild>
                       <Button
                         onClick={() => setSelectedEvent(event)}
                         disabled={event.current_participants >= event.max_participants}
+                        className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
+                        size="lg"
                       >
-                        {event.current_participants >= event.max_participants ? "Full" : "Book Now"}
+                        {event.current_participants >= event.max_participants ? "🌟 Fully Booked" : "🚀 Join Adventure"}
                       </Button>
                     </DialogTrigger>
                     <DialogContent>

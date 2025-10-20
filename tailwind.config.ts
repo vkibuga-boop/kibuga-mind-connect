@@ -52,11 +52,14 @@ export default {
         'gradient-hero': 'var(--gradient-hero)',
         'gradient-card': 'var(--gradient-card)',
         'gradient-subtle': 'var(--gradient-subtle)',
+        'gradient-nature': 'var(--gradient-nature)',
+        'gradient-adventure': 'var(--gradient-adventure)',
       },
       boxShadow: {
         'soft': 'var(--shadow-soft)',
         'medium': 'var(--shadow-medium)',
         'strong': 'var(--shadow-strong)',
+        'glow': 'var(--shadow-glow)',
       },
       transitionProperty: {
         'smooth': 'var(--transition-smooth)',
