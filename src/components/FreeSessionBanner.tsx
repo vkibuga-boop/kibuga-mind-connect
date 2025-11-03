@@ -6,7 +6,7 @@ const FreeSessionBanner = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-primary via-accent to-primary py-4 px-4 animate-gradient-x">
+    <div className="relative overflow-hidden bg-gradient-to-r from-primary via-accent to-primary py-3 px-4 animate-gradient-x">
       <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10"></div>
       <div className="container mx-auto relative z-10">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">

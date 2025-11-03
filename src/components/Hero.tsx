@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, Video } from "lucide-react";
-import heroImage from "@/assets/hero-therapy.jpg";
+import heroImage from "@/assets/therapist-professional.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center pt-20">
+    <section className="relative min-h-screen flex items-center pt-8">
       <div className="absolute inset-0 bg-gradient-subtle opacity-50" />
       
       <div className="container mx-auto px-4 relative z-10">
@@ -57,7 +57,7 @@ const Hero = () => {
             <div className="absolute inset-0 bg-gradient-hero opacity-20 blur-3xl rounded-full" />
             <img 
               src={heroImage} 
-              alt="Professional therapy environment" 
+              alt="Kibuga Mwaniki - Professional Therapist" 
               className="relative rounded-3xl shadow-strong w-full h-auto object-cover"
             />
           </div>

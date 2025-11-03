@@ -345,8 +345,9 @@ const AssessmentTake = () => {
               <CardContent>
                 {question.type === "single" && question.options && (
                   <RadioGroup
-                    value={answers[question.id]?.toString() || ""}
+                    value={answers[question.id] || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
+                    name={`question-${question.id}`}
                   >
                     {question.options.map((option, optIndex) => (
                       <div key={`${question.id}-${optIndex}`} className="flex items-center space-x-2 py-2">
@@ -388,6 +389,7 @@ const AssessmentTake = () => {
                   <RadioGroup
                     value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
+                    name={`question-${question.id}`}
                   >
                     <div className="flex justify-between items-center">
                       {Array.from(
