@@ -84,15 +84,7 @@ const AssessmentTake = () => {
   };
 
   const handleAnswerChange = (questionId: string, value: any) => {
-    // Extract actual value if it's prefixed with question ID
-    const actualValue = typeof value === 'string' && value.includes('-') 
-      ? value.substring(value.indexOf('-') + 1)
-      : value;
-    
-    // Convert to number if it's a numeric string
-    const finalValue = !isNaN(Number(actualValue)) ? Number(actualValue) : actualValue;
-    
-    setAnswers(prev => ({ ...prev, [questionId]: finalValue }));
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
   const handleMultipleChoice = (questionId: string, option: string, checked: boolean) => {
@@ -353,13 +345,12 @@ const AssessmentTake = () => {
               <CardContent>
                 {question.type === "single" && question.options && (
                   <RadioGroup
-                    value={answers[question.id] || ""}
+                    value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
-                    name={`single-group-${question.id}`}
                   >
                     {question.options.map((option, optIndex) => (
                       <div key={`${question.id}-${optIndex}`} className="flex items-center space-x-2 py-2">
-                        <RadioGroupItem value={`${question.id}-${option}`} id={`single-${question.id}-${optIndex}`} />
+                        <RadioGroupItem value={option} id={`single-${question.id}-${optIndex}`} />
                         <Label 
                           htmlFor={`single-${question.id}-${optIndex}`}
                           className="font-normal cursor-pointer"
@@ -397,7 +388,6 @@ const AssessmentTake = () => {
                   <RadioGroup
                     value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
-                    name={`scale-group-${question.id}`}
                   >
                     <div className="flex justify-between items-center">
                       {Array.from(
@@ -406,7 +396,7 @@ const AssessmentTake = () => {
                       ).map((value) => (
                         <div key={`scale-${question.id}-${value}`} className="flex flex-col items-center">
                           <RadioGroupItem 
-                            value={`${question.id}-${value}`}
+                            value={value.toString()}
                             id={`scale-${question.id}-${value}`}
                           />
                           <Label 

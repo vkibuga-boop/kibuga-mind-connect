@@ -9,8 +9,8 @@ import FreeSessionBanner from "@/components/FreeSessionBanner";
 const Index = () => {
   return (
     <div className="min-h-screen">
-      <Header />
       <FreeSessionBanner />
+      <Header />
       <Hero />
       <Services />
       <Assessments />
