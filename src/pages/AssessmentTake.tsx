@@ -184,6 +184,22 @@ const AssessmentTake = () => {
 
       if (error) throw error;
 
+      // Send notification email to admin
+      try {
+        await supabase.functions.invoke("send-assessment-notification", {
+          body: {
+            assessment_name: assessment?.name,
+            email: validatedData.email,
+            mobile_number: validatedData.mobile_number,
+            result_fee_kes: assessment?.result_fee_kes,
+            result_fee_usd: assessment?.result_fee_usd,
+            access_token: accessToken,
+          },
+        });
+      } catch (emailError) {
+        console.log("Email notification failed, but payment claim succeeded:", emailError);
+      }
+
       toast.success(
         "Payment details saved! Please send payment to M-Pesa Paybill 542542, Account: 00305615756150. We'll verify and send your results via email within 24 hours."
       );
@@ -345,13 +361,16 @@ const AssessmentTake = () => {
               <CardContent>
                 {question.type === "single" && question.options && (
                   <RadioGroup
+                    key={`radio-${question.id}`}
                     value={answers[question.id] || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
-                    name={`question-${question.id}`}
                   >
                     {question.options.map((option, optIndex) => (
                       <div key={`${question.id}-${optIndex}`} className="flex items-center space-x-2 py-2">
-                        <RadioGroupItem value={option} id={`single-${question.id}-${optIndex}`} />
+                        <RadioGroupItem 
+                          value={option} 
+                          id={`single-${question.id}-${optIndex}`}
+                        />
                         <Label 
                           htmlFor={`single-${question.id}-${optIndex}`}
                           className="font-normal cursor-pointer"
@@ -387,9 +406,9 @@ const AssessmentTake = () => {
 
                 {question.type === "scale" && (
                   <RadioGroup
+                    key={`radio-${question.id}`}
                     value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
-                    name={`question-${question.id}`}
                   >
                     <div className="flex justify-between items-center">
                       {Array.from(
