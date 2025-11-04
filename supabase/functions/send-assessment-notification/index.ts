@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.75.0";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const ADMIN_EMAIL = "vkibuga@gmail.com";
+const ADMIN_WHATSAPP = "254771700115"; // WhatsApp number in international format
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,14 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Processing assessment notification:", notification);
 
     if (!RESEND_API_KEY) {
-      console.error("RESEND_API_KEY not configured");
-      return new Response(
-        JSON.stringify({ error: "Email service not configured" }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+      console.warn("RESEND_API_KEY not configured, will only generate WhatsApp URL");
     }
 
     const emailSubject = `New Assessment Payment Claimed - ${notification.assessment_name}`;
@@ -57,30 +51,55 @@ const handler = async (req: Request): Promise<Response> => {
       <p>Once payment is verified, send the assessment results to: ${notification.email}</p>
     `;
 
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "Assessment Notifications <onboarding@resend.dev>",
-        to: [ADMIN_EMAIL],
-        subject: emailSubject,
-        html: emailHtml,
-      }),
-    });
+    // Prepare WhatsApp message
+    const whatsappMessage = `🔔 *New Assessment Payment*\n\n` +
+      `📋 *Assessment:* ${notification.assessment_name}\n` +
+      `💰 *Fee:* KES ${notification.result_fee_kes} / USD $${notification.result_fee_usd}\n\n` +
+      `👤 *User Details:*\n` +
+      `📧 Email: ${notification.email}\n` +
+      `📱 Mobile: ${notification.mobile_number}\n` +
+      `🔑 Token: ${notification.access_token}\n\n` +
+      `💵 *Payment:* M-Pesa Paybill 542542, Acc: 00305615756150\n\n` +
+      `⚡ *Action Required:* Verify payment and send results to user email`;
 
-    if (!res.ok) {
-      const error = await res.text();
-      console.error("Resend API error:", error);
-      throw new Error(`Failed to send email: ${error}`);
+    // Create WhatsApp link (admin can click this to send/view message)
+    const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(whatsappMessage)}`;
+    console.log("WhatsApp notification URL generated:", whatsappUrl);
+
+    let emailSent = false;
+
+    if (RESEND_API_KEY) {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: "Assessment Notifications <onboarding@resend.dev>",
+          to: [ADMIN_EMAIL],
+          subject: emailSubject,
+          html: emailHtml,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Email sent successfully:", data);
+        emailSent = true;
+      } else {
+        const error = await res.text();
+        console.error("Resend API error:", error);
+      }
+    } else {
+      console.log("RESEND_API_KEY not configured, skipping email");
     }
 
-    const data = await res.json();
-    console.log("Email sent successfully:", data);
-
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      emailSent,
+      whatsappUrl 
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

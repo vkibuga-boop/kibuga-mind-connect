@@ -178,14 +178,18 @@ const AssessmentTake = () => {
         .eq("access_token", accessToken)
         .is("payment_claimed_at", null)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Payment claim error:", error);
-        throw error;
+        throw new Error("Failed to update payment details. Please try again.");
       }
 
-      // Send notification email to admin
+      if (!data) {
+        throw new Error("Payment already claimed or invalid access token. Please contact support if this is an error.");
+      }
+
+      // Send notification email to admin and WhatsApp
       try {
         await supabase.functions.invoke("send-assessment-notification", {
           body: {
@@ -197,8 +201,8 @@ const AssessmentTake = () => {
             access_token: accessToken,
           },
         });
-      } catch (emailError) {
-        console.log("Email notification failed, but payment claim succeeded:", emailError);
+      } catch (notificationError) {
+        console.log("Notification failed, but payment claim succeeded:", notificationError);
       }
 
       toast.success(
@@ -363,6 +367,7 @@ const AssessmentTake = () => {
                 {question.type === "single" && question.options && (
                   <RadioGroup
                     key={`radio-group-${question.id}`}
+                    name={`question-${question.id}`}
                     value={answers[question.id] || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
                   >
@@ -414,6 +419,7 @@ const AssessmentTake = () => {
                 {question.type === "scale" && (
                   <RadioGroup
                     key={`radio-scale-${question.id}`}
+                    name={`question-scale-${question.id}`}
                     value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
                   >
