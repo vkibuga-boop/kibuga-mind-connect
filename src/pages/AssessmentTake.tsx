@@ -176,10 +176,14 @@ const AssessmentTake = () => {
           payment_claimed_at: new Date().toISOString(),
         })
         .eq("access_token", accessToken)
+        .is("payment_claimed_at", null)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Payment claim error:", error);
+        throw error;
+      }
 
       // Send notification email to admin
       try {
@@ -358,50 +362,58 @@ const AssessmentTake = () => {
               <CardContent>
                 {question.type === "single" && question.options && (
                   <RadioGroup
+                    key={`radio-group-${question.id}`}
                     value={answers[question.id] || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
                   >
-                    {question.options.map((option, optIndex) => (
-                      <div key={`opt-${question.id}-${optIndex}`} className="flex items-center space-x-2 py-2">
-                        <RadioGroupItem 
-                          value={option} 
-                          id={`q${index}-opt${optIndex}-${question.id}`}
-                        />
-                        <Label 
-                          htmlFor={`q${index}-opt${optIndex}-${question.id}`}
-                          className="font-normal cursor-pointer"
-                        >
-                          {option}
-                        </Label>
-                      </div>
-                    ))}
+                    {question.options.map((option, optIndex) => {
+                      const uniqueId = `q-${question.id}-opt-${optIndex}-${option.replace(/\s+/g, '-')}`;
+                      return (
+                        <div key={uniqueId} className="flex items-center space-x-2 py-2">
+                          <RadioGroupItem 
+                            value={option} 
+                            id={uniqueId}
+                          />
+                          <Label 
+                            htmlFor={uniqueId}
+                            className="font-normal cursor-pointer"
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      );
+                    })}
                   </RadioGroup>
                 )}
 
                 {question.type === "multiple" && question.options && (
                   <div className="space-y-3">
-                    {question.options.map((option) => (
-                      <div key={option} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`${question.id}-${option}`}
-                          checked={(answers[question.id] || []).includes(option)}
-                          onCheckedChange={(checked) => 
-                            handleMultipleChoice(question.id, option, checked as boolean)
-                          }
-                        />
-                        <Label
-                          htmlFor={`${question.id}-${option}`}
-                          className="font-normal cursor-pointer"
-                        >
-                          {option}
-                        </Label>
-                      </div>
-                    ))}
+                    {question.options.map((option, optIdx) => {
+                      const multiId = `multi-${question.id}-${optIdx}-${option.replace(/\s+/g, '-')}`;
+                      return (
+                        <div key={multiId} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={multiId}
+                            checked={(answers[question.id] || []).includes(option)}
+                            onCheckedChange={(checked) => 
+                              handleMultipleChoice(question.id, option, checked as boolean)
+                            }
+                          />
+                          <Label
+                            htmlFor={multiId}
+                            className="font-normal cursor-pointer"
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
                 {question.type === "scale" && (
                   <RadioGroup
+                    key={`radio-scale-${question.id}`}
                     value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
                   >
@@ -409,20 +421,23 @@ const AssessmentTake = () => {
                       {Array.from(
                         { length: (question.scaleMax || 10) - (question.scaleMin || 0) + 1 },
                         (_, i) => (question.scaleMin || 0) + i
-                      ).map((value) => (
-                        <div key={`scl-${question.id}-${value}`} className="flex flex-col items-center">
-                          <RadioGroupItem 
-                            value={value.toString()}
-                            id={`q${index}-scale${value}-${question.id}`}
-                          />
-                          <Label 
-                            htmlFor={`q${index}-scale${value}-${question.id}`}
-                            className="mt-1 cursor-pointer"
-                          >
-                            {value}
-                          </Label>
-                        </div>
-                      ))}
+                      ).map((value) => {
+                        const uniqueScaleId = `scale-${question.id}-val-${value}`;
+                        return (
+                          <div key={uniqueScaleId} className="flex flex-col items-center">
+                            <RadioGroupItem 
+                              value={value.toString()}
+                              id={uniqueScaleId}
+                            />
+                            <Label 
+                              htmlFor={uniqueScaleId}
+                              className="mt-1 cursor-pointer"
+                            >
+                              {value}
+                            </Label>
+                          </div>
+                        );
+                      })}
                     </div>
                     <div className="flex justify-between text-sm text-muted-foreground mt-2">
                       <span>Not at all</span>

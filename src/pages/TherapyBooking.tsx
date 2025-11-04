@@ -102,11 +102,13 @@ const TherapyBooking = () => {
       total_price_kes: service[priceKey],
       total_price_usd: service[priceUsdKey],
       phone_number: phoneNumber.trim(),
+      notes: `Name: ${name.trim()}, Email: ${email.trim()}`,
     }]);
 
     if (error) {
+      console.error("Booking error:", error);
       setLoading(false);
-      toast.error("Failed to create booking");
+      toast.error("Failed to create booking. Please try again.");
       return;
     }
 

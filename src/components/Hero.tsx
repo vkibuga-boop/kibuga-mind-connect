@@ -1,12 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, Video } from "lucide-react";
 import heroImage from "@/assets/mental-health-hero.png";
+import therapistImage from "@/assets/therapist-professional.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center pt-8">
-      <div className="absolute inset-0 bg-gradient-subtle opacity-50" />
-      
+    <section 
+      className="relative min-h-screen flex items-center pt-8 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.88)), url(${heroImage})`
+      }}
+    >
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 animate-fade-in-up">
@@ -56,7 +60,7 @@ const Hero = () => {
           <div className="relative animate-float hidden md:block">
             <div className="absolute inset-0 bg-gradient-hero opacity-20 blur-3xl rounded-full" />
             <img 
-              src={heroImage} 
+              src={therapistImage} 
               alt="Kibuga Mwaniki - Professional Therapist" 
               className="relative rounded-3xl shadow-strong w-full h-auto object-cover"
             />
