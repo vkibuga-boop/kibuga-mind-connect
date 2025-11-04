@@ -126,24 +126,21 @@ const AssessmentTake = () => {
 
     try {
       const { data, error } = await supabase
-        .from("user_assessment_results")
-        .insert({
-          assessment_id: id,
-          answers,
-          user_id: null,
-        })
-        .select("access_token")
-        .single();
+        .rpc("submit_assessment_result", {
+          p_assessment_id: id,
+          p_answers: answers,
+        });
 
       if (error) throw error;
 
-      if (data?.access_token) {
-        setAccessToken(data.access_token);
+      if (data && data.length > 0 && data[0].access_token) {
+        setAccessToken(data[0].access_token);
       }
 
       setSubmitted(true);
       toast.success("Assessment submitted successfully!");
     } catch (error) {
+      console.error("Assessment submission error:", error);
       toast.error("Failed to submit assessment. Please try again.");
     } finally {
       setSubmitting(false);
@@ -361,18 +358,17 @@ const AssessmentTake = () => {
               <CardContent>
                 {question.type === "single" && question.options && (
                   <RadioGroup
-                    key={`radio-${question.id}`}
                     value={answers[question.id] || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
                   >
                     {question.options.map((option, optIndex) => (
-                      <div key={`${question.id}-${optIndex}`} className="flex items-center space-x-2 py-2">
+                      <div key={`opt-${question.id}-${optIndex}`} className="flex items-center space-x-2 py-2">
                         <RadioGroupItem 
                           value={option} 
-                          id={`single-${question.id}-${optIndex}`}
+                          id={`q${index}-opt${optIndex}-${question.id}`}
                         />
                         <Label 
-                          htmlFor={`single-${question.id}-${optIndex}`}
+                          htmlFor={`q${index}-opt${optIndex}-${question.id}`}
                           className="font-normal cursor-pointer"
                         >
                           {option}
@@ -406,7 +402,6 @@ const AssessmentTake = () => {
 
                 {question.type === "scale" && (
                   <RadioGroup
-                    key={`radio-${question.id}`}
                     value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
                   >
@@ -415,13 +410,13 @@ const AssessmentTake = () => {
                         { length: (question.scaleMax || 10) - (question.scaleMin || 0) + 1 },
                         (_, i) => (question.scaleMin || 0) + i
                       ).map((value) => (
-                        <div key={`scale-${question.id}-${value}`} className="flex flex-col items-center">
+                        <div key={`scl-${question.id}-${value}`} className="flex flex-col items-center">
                           <RadioGroupItem 
                             value={value.toString()}
-                            id={`scale-${question.id}-${value}`}
+                            id={`q${index}-scale${value}-${question.id}`}
                           />
                           <Label 
-                            htmlFor={`scale-${question.id}-${value}`}
+                            htmlFor={`q${index}-scale${value}-${question.id}`}
                             className="mt-1 cursor-pointer"
                           >
                             {value}

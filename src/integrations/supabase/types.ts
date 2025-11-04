@@ -364,7 +364,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      submit_assessment_result: {
+        Args: { p_answers: Json; p_assessment_id: string }
+        Returns: {
+          access_token: string
+        }[]
+      }
     }
     Enums: {
       booking_status: "pending" | "confirmed" | "completed" | "cancelled"
