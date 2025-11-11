@@ -38,7 +38,7 @@ const AssessmentTake = () => {
   const navigate = useNavigate();
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [loading, setLoading] = useState(true);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<Record<number, any>>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [accessToken, setAccessToken] = useState<string>("");
@@ -83,17 +83,17 @@ const AssessmentTake = () => {
     setLoading(false);
   };
 
-  const handleAnswerChange = (questionId: string, value: any) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  const handleAnswerChange = (questionIndex: number, value: any) => {
+    setAnswers(prev => ({ ...prev, [questionIndex]: value }));
   };
 
-  const handleMultipleChoice = (questionId: string, option: string, checked: boolean) => {
+  const handleMultipleChoice = (questionIndex: number, option: string, checked: boolean) => {
     setAnswers(prev => {
-      const current = prev[questionId] || [];
+      const current = prev[questionIndex] || [];
       if (checked) {
-        return { ...prev, [questionId]: [...current, option] };
+        return { ...prev, [questionIndex]: [...current, option] };
       } else {
-        return { ...prev, [questionId]: current.filter((item: string) => item !== option) };
+        return { ...prev, [questionIndex]: current.filter((item: string) => item !== option) };
       }
     });
   };
@@ -101,8 +101,8 @@ const AssessmentTake = () => {
   const validateAnswers = () => {
     if (!assessment) return false;
     
-    for (const question of assessment.questions) {
-      const answer = answers[question.id];
+    for (let i = 0; i < assessment.questions.length; i++) {
+      const answer = answers[i];
       
       // For multiple choice, check if array has items
       if (Array.isArray(answer)) {
@@ -133,8 +133,14 @@ const AssessmentTake = () => {
 
       if (error) throw error;
 
+      console.log("Assessment submission response:", data);
+      
       if (data && data.length > 0 && data[0].access_token) {
-        setAccessToken(data[0].access_token);
+        const token = data[0].access_token;
+        console.log("Access token received:", token);
+        setAccessToken(token);
+      } else {
+        console.error("No access token in response:", data);
       }
 
       setSubmitted(true);
@@ -162,6 +168,7 @@ const AssessmentTake = () => {
       });
 
       if (!accessToken) {
+        console.error("No access token available for payment claim");
         toast.error("Invalid submission. Please try taking the assessment again.");
         return;
       }
@@ -172,6 +179,8 @@ const AssessmentTake = () => {
         email: validatedData.email,
         mobile_number: validatedData.mobile_number,
         access_token: accessToken,
+        access_token_length: accessToken.length,
+        access_token_type: typeof accessToken,
       });
 
       const { data, error } = await supabase
@@ -384,13 +393,13 @@ const AssessmentTake = () => {
               <CardContent>
                 {question.type === "single" && question.options && (
                   <RadioGroup
-                    key={`single-${question.id}`}
-                    name={`question-${question.id}`}
-                    value={answers[question.id] || ""}
-                    onValueChange={(value) => handleAnswerChange(question.id, value)}
+                    key={`single-${index}`}
+                    name={`question-${index}`}
+                    value={answers[index] || ""}
+                    onValueChange={(value) => handleAnswerChange(index, value)}
                   >
                     {question.options.map((option, optIndex) => {
-                      const uniqueId = `single-q${question.id}-opt${optIndex}`;
+                      const uniqueId = `single-q${index}-opt${optIndex}`;
                       return (
                         <div key={uniqueId} className="flex items-center space-x-2 py-2">
                           <RadioGroupItem 
@@ -412,14 +421,14 @@ const AssessmentTake = () => {
                 {question.type === "multiple" && question.options && (
                   <div className="space-y-3">
                     {question.options.map((option, optIdx) => {
-                      const multiId = `multi-${question.id}-${optIdx}-${option.replace(/\s+/g, '-')}`;
+                      const multiId = `multi-${index}-${optIdx}-${option.replace(/\s+/g, '-')}`;
                       return (
                         <div key={multiId} className="flex items-center space-x-2">
                           <Checkbox
                             id={multiId}
-                            checked={(answers[question.id] || []).includes(option)}
+                            checked={(answers[index] || []).includes(option)}
                             onCheckedChange={(checked) => 
-                              handleMultipleChoice(question.id, option, checked as boolean)
+                              handleMultipleChoice(index, option, checked as boolean)
                             }
                           />
                           <Label
@@ -436,17 +445,17 @@ const AssessmentTake = () => {
 
                 {question.type === "scale" && (
                   <RadioGroup
-                    key={`scale-${question.id}`}
-                    name={`scale-${question.id}`}
-                    value={answers[question.id]?.toString() || ""}
-                    onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
+                    key={`scale-${index}`}
+                    name={`scale-${index}`}
+                    value={answers[index]?.toString() || ""}
+                    onValueChange={(value) => handleAnswerChange(index, parseInt(value))}
                   >
                     <div className="flex justify-between items-center">
                       {Array.from(
                         { length: (question.scaleMax || 10) - (question.scaleMin || 0) + 1 },
                         (_, i) => (question.scaleMin || 0) + i
                       ).map((value) => {
-                        const uniqueScaleId = `scale-q${question.id}-v${value}`;
+                        const uniqueScaleId = `scale-q${index}-v${value}`;
                         return (
                           <div key={uniqueScaleId} className="flex flex-col items-center">
                             <RadioGroupItem 
