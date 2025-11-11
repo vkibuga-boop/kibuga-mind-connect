@@ -212,7 +212,11 @@ const AssessmentTake = () => {
       if (error instanceof z.ZodError) {
         const firstError = error.issues[0];
         toast.error(firstError.message);
+      } else if (error instanceof Error) {
+        console.error("Payment claim error:", error);
+        toast.error(error.message);
       } else {
+        console.error("Unknown payment claim error:", error);
         toast.error("Failed to save payment details. Please try again.");
       }
     } finally {
@@ -366,13 +370,12 @@ const AssessmentTake = () => {
               <CardContent>
                 {question.type === "single" && question.options && (
                   <RadioGroup
-                    key={`radio-group-${question.id}`}
-                    name={`question-${question.id}`}
+                    key={`single-${question.id}`}
                     value={answers[question.id] || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
                   >
                     {question.options.map((option, optIndex) => {
-                      const uniqueId = `q-${question.id}-opt-${optIndex}-${option.replace(/\s+/g, '-')}`;
+                      const uniqueId = `single-q${question.id}-opt${optIndex}`;
                       return (
                         <div key={uniqueId} className="flex items-center space-x-2 py-2">
                           <RadioGroupItem 
@@ -418,8 +421,7 @@ const AssessmentTake = () => {
 
                 {question.type === "scale" && (
                   <RadioGroup
-                    key={`radio-scale-${question.id}`}
-                    name={`question-scale-${question.id}`}
+                    key={`scale-${question.id}`}
                     value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
                   >
@@ -428,7 +430,7 @@ const AssessmentTake = () => {
                         { length: (question.scaleMax || 10) - (question.scaleMin || 0) + 1 },
                         (_, i) => (question.scaleMin || 0) + i
                       ).map((value) => {
-                        const uniqueScaleId = `scale-${question.id}-val-${value}`;
+                        const uniqueScaleId = `scale-q${question.id}-v${value}`;
                         return (
                           <div key={uniqueScaleId} className="flex flex-col items-center">
                             <RadioGroupItem 
