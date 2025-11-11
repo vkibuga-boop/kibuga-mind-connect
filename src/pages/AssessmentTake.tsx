@@ -168,6 +168,12 @@ const AssessmentTake = () => {
 
       setClaimingPayment(true);
 
+      console.log("Attempting payment claim with:", {
+        email: validatedData.email,
+        mobile_number: validatedData.mobile_number,
+        access_token: accessToken,
+      });
+
       const { data, error } = await supabase
         .from("user_assessment_results")
         .update({
@@ -180,12 +186,20 @@ const AssessmentTake = () => {
         .select()
         .maybeSingle();
 
+      console.log("Payment claim result:", { data, error });
+
       if (error) {
-        console.error("Payment claim error:", error);
-        throw new Error("Failed to update payment details. Please try again.");
+        console.error("Payment claim Supabase error details:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        });
+        throw new Error(`Database error: ${error.message}. Please contact support.`);
       }
 
       if (!data) {
+        console.error("No data returned from payment claim update");
         throw new Error("Payment already claimed or invalid access token. Please contact support if this is an error.");
       }
 
@@ -371,6 +385,7 @@ const AssessmentTake = () => {
                 {question.type === "single" && question.options && (
                   <RadioGroup
                     key={`single-${question.id}`}
+                    name={`question-${question.id}`}
                     value={answers[question.id] || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, value)}
                   >
@@ -422,6 +437,7 @@ const AssessmentTake = () => {
                 {question.type === "scale" && (
                   <RadioGroup
                     key={`scale-${question.id}`}
+                    name={`scale-${question.id}`}
                     value={answers[question.id]?.toString() || ""}
                     onValueChange={(value) => handleAnswerChange(question.id, parseInt(value))}
                   >
